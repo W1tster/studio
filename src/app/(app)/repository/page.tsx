@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Bot, Cpu, Wrench, Antenna, Network, Trowel } from "lucide-react";
+import { ArrowRight, Bot, Cpu, Wrench, Antenna, Network, Hammer } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
@@ -9,7 +9,7 @@ const branches = [
   { name: "Mechanical", href: "mech", icon: <Wrench className="h-8 w-8 text-primary" /> },
   { name: "Electronics & Telecommunication", href: "entc", icon: <Antenna className="h-8 w-8 text-primary" /> },
   { name: "Information Technology", href: "it", icon: <Network className="h-8 w-8 text-primary" /> },
-  { name: "Civil", href: "civil", icon: <Trowel className="h-8 w-8 text-primary" /> },
+  { name: "Civil", href: "civil", icon: <Hammer className="h-8 w-8 text-primary" /> },
 ];
 
 export default function RepositoryPage() {

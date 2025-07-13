@@ -1,13 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import {-
+import {
   Bot,
   Cpu,
   Wrench,
   Antenna,
   Network,
-  Trowel,
+  Hammer,
 } from "lucide-react";
 
 const branchDetails: { [key: string]: { name: string; icon: React.ReactNode } } = {
@@ -16,7 +16,7 @@ const branchDetails: { [key: string]: { name: string; icon: React.ReactNode } } 
   "mech": { name: "Mechanical", icon: <Wrench className="h-6 w-6" /> },
   "entc": { name: "Electronics & Telecommunication", icon: <Antenna className="h-6 w-6" /> },
   "it": { name: "Information Technology", icon: <Network className="h-6 w-6" /> },
-  "civil": { name: "Civil", icon: <Trowel className="h-6 w-6" /> },
+  "civil": { name: "Civil", icon: <Hammer className="h-6 w-6" /> },
 };
 
 const years = [
