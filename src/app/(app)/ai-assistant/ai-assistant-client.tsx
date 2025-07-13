@@ -100,9 +100,10 @@ export function AiAssistantClient() {
     setFile(null);
 
     const historyForApi: HistoryMessage[] = messages.map(msg => {
-        const content: HistoryMessage['content'] = [{ text: msg.content.text }];
-        // Note: The API currently only supports one media part per message.
-        // For simplicity, we assume files are only in user messages.
+        const content: HistoryMessage['content'] = [];
+        if (msg.content.text) {
+          content.push({ text: msg.content.text });
+        }
         if (msg.role === 'user' && msg.content.file?.dataUri) {
              content.push({ media: { url: msg.content.file.dataUri, contentType: msg.content.file.type } });
         }
