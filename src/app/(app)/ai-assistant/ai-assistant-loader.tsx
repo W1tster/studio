@@ -1,5 +1,6 @@
-import { Suspense } from "react";
-import { AiAssistantLoader } from "./ai-assistant-loader";
+'use client';
+
+import dynamic from 'next/dynamic';
 import { Skeleton } from "@/components/ui/skeleton";
 
 function AiAssistantLoading() {
@@ -19,18 +20,12 @@ function AiAssistantLoading() {
   )
 }
 
-export default function AiAssistantPage() {
-  return (
-    <div className="flex flex-col gap-4 h-full">
-      <div className="flex-shrink-0">
-        <h1 className="text-3xl font-bold tracking-tight">AI Assistant</h1>
-        <p className="text-muted-foreground">Your smart study partner, powered by Gemini.</p>
-      </div>
-      <div className="flex-grow overflow-hidden">
-        <Suspense fallback={<AiAssistantLoading />}>
-          <AiAssistantLoader />
-        </Suspense>
-      </div>
-    </div>
-  );
+const AiAssistantClient = dynamic(() => 
+  import("./ai-assistant-client").then((mod) => mod.AiAssistantClient),
+  { ssr: false, loading: () => <AiAssistantLoading /> }
+);
+
+// This component simply wraps the AiAssistantClient to allow for dynamic, client-side loading.
+export function AiAssistantLoader() {
+    return <AiAssistantClient />;
 }
