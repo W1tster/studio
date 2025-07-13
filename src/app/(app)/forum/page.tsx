@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,10 +26,32 @@ const initialPosts = [
 ];
 
 export default function ForumPage() {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState<typeof initialPosts>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+    try {
+      const savedPosts = localStorage.getItem("forumPosts");
+      if (savedPosts) {
+        setPosts(JSON.parse(savedPosts));
+      } else {
+        setPosts(initialPosts);
+      }
+    } catch (error) {
+      console.error("Failed to parse posts from localStorage", error);
+      setPosts(initialPosts);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted) {
+      localStorage.setItem("forumPosts", JSON.stringify(posts));
+    }
+  }, [posts, hasMounted]);
 
   const handleCreatePost = () => {
     if (newPostTitle.trim() === "" || newPostContent.trim() === "") return;
@@ -43,14 +65,17 @@ export default function ForumPage() {
       votes: 0,
       branch: "General",
       year: "FE",
-      content: newPostContent,
     };
 
-    setPosts([newPost, ...posts]);
+    setPosts(prevPosts => [newPost, ...prevPosts]);
     setNewPostTitle("");
     setNewPostContent("");
     setIsDialogOpen(false);
   };
+
+  if (!hasMounted) {
+    return null; 
+  }
 
   return (
     <div className="flex flex-col gap-8">
