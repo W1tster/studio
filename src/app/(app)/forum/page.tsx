@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Plus, MessageSquare, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, MessageSquare, ArrowUp, ArrowDown, Paperclip, X } from "lucide-react";
 import Link from "next/link";
 import {
   Dialog,
@@ -19,9 +19,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 const initialPosts = [
-    { id: '1', title: "Doubts about Asymptotic Notation in Algorithms", author: "Priya S.", authorInitials: "PS", replies: 12, votes: 45, branch: "CS", year: "SE" },
+    { id: '1', title: "Doubts about Asymptotic Notation in Algorithms", author: "Priya S.", authorInitials: "PS", replies: 12, votes: 45, branch: "CS", year: "SE", attachment: "notes.pdf" },
     { id: '2', title: "Best resources for learning Thermodynamics?", author: "Rohan M.", authorInitials: "RM", replies: 8, votes: 32, branch: "Mechanical", year: "TE" },
-    { id: '3', title: "Internship opportunities for AI/DS students", author: "Aisha K.", authorInitials: "AK", replies: 23, votes: 89, branch: "AI&DS", year: "TE" },
+    { id: '3', title: "Internship opportunities for AI/DS students", author: "Aisha K.", authorInitials: "AK", replies: 23, votes: 89, branch: "AI&DS", year: "TE", attachment: "internship_list.docx" },
     { id: '4', title: "How to prepare for the final year project?", author: "Vikram R.", authorInitials: "VR", replies: 5, votes: 18, branch: "IT", year: "BE" },
 ];
 
@@ -30,7 +30,9 @@ export default function ForumPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
+  const [newPostFile, setNewPostFile] = useState<File | null>(null);
   const [hasMounted, setHasMounted] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setHasMounted(true);
@@ -65,13 +67,22 @@ export default function ForumPage() {
       votes: 0,
       branch: "General",
       year: "FE",
+      attachment: newPostFile?.name,
     };
 
     setPosts(prevPosts => [newPost, ...prevPosts]);
     setNewPostTitle("");
     setNewPostContent("");
+    setNewPostFile(null);
     setIsDialogOpen(false);
   };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setNewPostFile(e.target.files[0]);
+    }
+  };
+
 
   if (!hasMounted) {
     return null; 
@@ -117,6 +128,12 @@ export default function ForumPage() {
                                     <MessageSquare className="h-4 w-4" />
                                     <span>{post.replies} replies</span>
                                 </div>
+                                {post.attachment && (
+                                    <div className="flex items-center gap-1">
+                                        <Paperclip className="h-4 w-4" />
+                                        <span>Attachment</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </CardContent>
@@ -130,7 +147,7 @@ export default function ForumPage() {
           <DialogHeader>
             <DialogTitle>Create a New Post</DialogTitle>
             <DialogDescription>
-              Share your question or knowledge with the community.
+              Share your question or knowledge with the community. Attach a file if needed.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -157,6 +174,37 @@ export default function ForumPage() {
                 className="col-span-3 min-h-[120px]"
                 placeholder="Elaborate on your question or topic here."
               />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="attachment" className="text-right">
+                    Attachment
+                </Label>
+                 <div className="col-span-3">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="attachment"
+                    />
+                    {!newPostFile ? (
+                        <Button
+                            variant="outline"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <Paperclip className="mr-2 h-4 w-4" />
+                            Select File
+                        </Button>
+                    ) : (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Paperclip className="h-4 w-4 flex-shrink-0" />
+                            <span className="truncate">{newPostFile.name}</span>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setNewPostFile(null)}>
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </div>
           </div>
           <DialogFooter>

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, Paperclip } from "lucide-react";
 
 const post = {
     id: '1', 
@@ -14,7 +14,8 @@ const post = {
     content: "Hi everyone, I'm having trouble understanding the difference between Big-O, Big-Omega, and Big-Theta notation. Can someone explain it in simple terms with an example? The textbook is a bit confusing.",
     votes: 45,
     branch: "CS", 
-    year: "SE"
+    year: "SE",
+    attachment: "asymptotic_notation_questions.pdf"
 };
 
 const replies = [
@@ -23,6 +24,7 @@ const replies = [
 ];
 
 export default function PostDetailPage({ params }: { params: { postId: string } }) {
+  // In a real app, you would fetch the post details based on params.postId
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-6">
         <Card>
@@ -40,6 +42,16 @@ export default function PostDetailPage({ params }: { params: { postId: string } 
             </CardHeader>
             <CardContent>
                 <p className="leading-relaxed">{post.content}</p>
+                {post.attachment && (
+                    <div className="mt-4">
+                        <Button variant="outline" size="sm" asChild>
+                            <a href="#" download>
+                                <Paperclip className="mr-2 h-4 w-4" />
+                                {post.attachment}
+                            </a>
+                        </Button>
+                    </div>
+                )}
                  <div className="flex items-center gap-2 mt-4">
                     <Button variant="outline" size="sm" className="gap-2"> <ArrowUp className="h-4 w-4" /> Upvote </Button>
                     <span className="font-bold">{post.votes}</span>
