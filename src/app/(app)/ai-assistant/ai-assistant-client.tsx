@@ -13,15 +13,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 type Message = {
   role: 'user' | 'model';
-  content: string;
-  file?: {
-    name: string;
-    type: string;
-    dataUri: string;
-  };
+  content: {
+    text: string;
+    file?: {
+      name: string;
+      type: string;
+      dataUri: string;
+    }
+  }
 };
 
-type ContentPart = ChatInput['history'][number]['content'][number];
+type HistoryMessage = ChatInput['history'][number];
 
 export function AiAssistantClient() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -65,15 +67,19 @@ export function AiAssistantClient() {
     setIsLoading(true);
 
     let fileDataUri: string | undefined;
-    let userMessageContent = input;
+    let fileMetadata: Message['content']['file'] | undefined;
 
     if (file) {
-      userMessageContent += `\n\nAttached file: ${file.name}`;
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
       await new Promise<void>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
         reader.onload = () => {
           fileDataUri = reader.result as string;
+          fileMetadata = {
+            name: file.name,
+            type: file.type,
+            dataUri: fileDataUri,
+          };
           resolve();
         };
         reader.onerror = (error) => reject(error);
@@ -82,32 +88,35 @@ export function AiAssistantClient() {
     
     const newUserMessage: Message = {
       role: 'user',
-      content: userMessageContent,
-      ...(file && { file: { name: file.name, type: file.type, dataUri: fileDataUri! } }),
+      content: {
+        text: input,
+        ...(fileMetadata && { file: fileMetadata }),
+      },
     };
 
-    setMessages((prev) => [...prev, newUserMessage]);
+    const updatedMessages = [...messages, newUserMessage];
+    setMessages(updatedMessages);
     setInput('');
     setFile(null);
 
-    const historyForApi: ChatInput['history'] = messages.map((msg) => {
-        const content: ContentPart[] = [{ text: msg.content }];
-        if (msg.file?.dataUri) {
-            content.push({ media: { url: msg.file.dataUri, contentType: msg.file.type } });
+    const historyForApi: HistoryMessage[] = updatedMessages.map(msg => {
+        const content: HistoryMessage['content'] = [{ text: msg.content.text }];
+        if (msg.content.file?.dataUri) {
+            content.push({ media: { url: msg.content.file.dataUri, contentType: msg.content.file.type } });
         }
         return { role: msg.role, content };
     });
 
     try {
       const result = await chat({
-        history: historyForApi,
+        history: historyForApi.slice(0, -1),
         message: input,
-        fileDataUri,
+        fileDataUri: fileMetadata?.dataUri,
       });
 
       const assistantMessage: Message = {
         role: 'model',
-        content: result.response,
+        content: { text: result.response },
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (e) {
@@ -115,9 +124,13 @@ export function AiAssistantClient() {
       const errorMsg = e instanceof Error ? e.message : 'An unknown error occurred.';
       setError(errorMsg);
       toast({ variant: 'destructive', title: 'Error', description: errorMsg });
-      // Restore user message on error
       setMessages(prev => prev.slice(0, -1));
-      setInput(newUserMessage.content);
+      setInput(newUserMessage.content.text);
+      if (newUserMessage.content.file) {
+        // This is a simplification. Restoring the file object is more complex.
+        // For now, we just indicate that a file was attached.
+        toast({ title: "Message not sent", description: "Your message with attachment was not sent. Please try again."})
+      }
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +145,7 @@ export function AiAssistantClient() {
               <div className="text-center text-muted-foreground">
                 <Sparkles className="mx-auto h-12 w-12" />
                 <h2 className="mt-2 text-xl font-semibold">Start the Conversation</h2>
-                <p>Ask a question, paste some text to summarize, or upload a file.</p>
+                <p>Ask a question, or upload a file to discuss.</p>
               </div>
             )}
             {messages.map((msg, index) => (
@@ -143,7 +156,13 @@ export function AiAssistantClient() {
                   </Avatar>
                 )}
                 <div className={`max-w-[75%] rounded-lg px-4 py-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                  <p className="whitespace-pre-wrap">{msg.content.text}</p>
+                   {msg.content.file && (
+                    <div className="mt-2 text-sm flex items-center gap-2 bg-primary/20 p-2 rounded-md">
+                      <Paperclip className="h-4 w-4" />
+                      <span>{msg.content.file.name}</span>
+                    </div>
+                  )}
                 </div>
                 {msg.role === 'user' && (
                   <Avatar className="w-8 h-8 border">
@@ -178,46 +197,48 @@ export function AiAssistantClient() {
         </ScrollArea>
       </CardContent>
       <CardFooter className="p-4 border-t bg-card">
-        <div className="flex w-full items-center space-x-2 relative">
-           <Textarea
-            placeholder="Type your message or ask a question..."
-            className="resize-none pr-24 min-h-[52px]"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-              }
-            }}
-            disabled={isLoading}
-          />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-            <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => fileInputRef.current?.click()}
+        <div className="flex flex-col w-full gap-2">
+            <div className="flex w-full items-center space-x-2 relative">
+            <Textarea
+                placeholder="Type your message or ask a question..."
+                className="resize-none pr-24 min-h-[52px]"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+                }}
                 disabled={isLoading}
-                aria-label="Attach file"
-              >
-              <Paperclip className="h-5 w-5" />
-            </Button>
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+            />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isLoading}
+                    aria-label="Attach file"
+                >
+                <Paperclip className="h-5 w-5" />
+                </Button>
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
 
-            <Button onClick={handleSendMessage} disabled={isLoading || (!input.trim() && !file)} size="icon" aria-label="Send message">
-              <Send className="h-5 w-5" />
-            </Button>
-          </div>
+                <Button onClick={handleSendMessage} disabled={isLoading || (!input.trim() && !file)} size="icon" aria-label="Send message">
+                <Send className="h-5 w-5" />
+                </Button>
+            </div>
+            </div>
+            {file && (
+            <div className="text-sm text-muted-foreground flex items-center gap-2 bg-muted p-2 rounded-md">
+                <Paperclip className="h-4 w-4" />
+                <span>{file.name}</span>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setFile(null)}>
+                <X className="h-4 w-4" />
+                </Button>
+            </div>
+            )}
         </div>
-        {file && (
-          <div className="mt-2 text-sm text-muted-foreground flex items-center gap-2 bg-muted p-2 rounded-md">
-            <Paperclip className="h-4 w-4" />
-            <span>{file.name}</span>
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setFile(null)}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
       </CardFooter>
     </Card>
   );
