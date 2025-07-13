@@ -94,22 +94,21 @@ export function AiAssistantClient() {
       },
     };
 
-    const updatedMessages = [...messages, newUserMessage];
-    setMessages(updatedMessages);
+    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
     setInput('');
     setFile(null);
 
-    const historyForApi: HistoryMessage[] = updatedMessages.map(msg => {
+    const historyForApi: HistoryMessage[] = messages.map(msg => {
         const content: HistoryMessage['content'] = [{ text: msg.content.text }];
         if (msg.content.file?.dataUri) {
-            content.push({ media: { url: msg.content.file.dataUri, contentType: msg.content.file.type } });
+             content.push({ media: { url: msg.content.file.dataUri, contentType: msg.content.file.type } });
         }
         return { role: msg.role, content };
     });
 
     try {
       const result = await chat({
-        history: historyForApi.slice(0, -1),
+        history: historyForApi,
         message: input,
         fileDataUri: fileMetadata?.dataUri,
       });
