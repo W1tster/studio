@@ -8,6 +8,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import type { ChatInput, ChatOutput } from './chat.d';
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
@@ -20,20 +21,18 @@ const MessageSchema = z.object({
   })),
 });
 
-export const ChatInputSchema = z.object({
+const ChatInputSchema = z.object({
   history: z.array(MessageSchema),
   message: z.string().describe('The user\'s message.'),
   fileDataUri: z.string().optional().describe("An optional file, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
-export type ChatInput = z.infer<typeof ChatInputSchema>;
 
-export const ChatOutputSchema = z.object({
+
+const ChatOutputSchema = z.object({
   response: z.string().describe('The AI\'s response.'),
 });
-export type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
-
-export async function chat(input: ChatInput): Promise<{ response: string; }> {
+export async function chat(input: ChatInput): Promise<ChatOutput> {
   return chatFlow(input);
 }
 

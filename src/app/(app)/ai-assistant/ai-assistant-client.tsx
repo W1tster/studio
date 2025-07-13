@@ -6,7 +6,8 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea';
 import { Loader, Send, Paperclip, X, User, Sparkles, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { chat, type ChatInput } from '@/ai/flows/chat';
+import { chat } from '@/ai/flows/chat';
+import type { ChatInput } from '@/ai/flows/chat.d';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
