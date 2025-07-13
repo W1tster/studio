@@ -3,13 +3,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowRight, BrainCircuit, Library, MessagesSquare, Plus } from "lucide-react";
 import Link from "next/link";
 import Image from 'next/image';
+import Balancer from "react-wrap-balancer";
 
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Welcome back, Student!</h1>
-        <p className="text-muted-foreground">Here's a quick overview of your study world.</p>
+        <h1 className="text-3xl font-bold tracking-tight">
+          <Balancer>Welcome back, Student!</Balancer>
+        </h1>
+        <p className="text-muted-foreground">
+          <Balancer>Here's a quick overview of your study world.</Balancer>
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
