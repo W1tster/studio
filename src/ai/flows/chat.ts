@@ -35,7 +35,7 @@ const chatFlow = ai.defineFlow(
     // The history contains all messages EXCEPT the last one.
     const history = allMessages.slice(0, -1).map(msg => ({
       role: msg.role,
-      content: [{text: msg.content.text}],
+      content: [{text: msg.content.text}], // File content from history is ignored for simplicity
     }));
 
     // The prompt contains only the parts of the new user's message.
@@ -48,6 +48,11 @@ const chatFlow = ai.defineFlow(
         media: {url: lastUserMessage.content.file.dataUri},
       });
     }
+    
+    if (promptParts.length === 0) {
+      // Should not happen if client validates, but as a safeguard.
+      return { response: "I didn't receive a message. Please try again." };
+    }
 
     const {output} = await ai.generate({
       model: 'googleai/gemini-1.5-flash',
@@ -57,8 +62,7 @@ const chatFlow = ai.defineFlow(
 
     const response = output?.text ?? '';
     if (!response) {
-      // Return an empty string which the client will handle as an error.
-      // This is better than throwing, which can crash the server action.
+      // This is what triggers the error on the client.
       return { response: '' };
     }
 
