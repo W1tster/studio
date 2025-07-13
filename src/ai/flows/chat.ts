@@ -56,10 +56,7 @@ const chatFlow = ai.defineFlow(
 
     const { output } = await ai.generate({
         history,
-        prompt: {
-            role: 'user',
-            content: promptParts
-        },
+        prompt: promptParts,
         config: {
             // Use a more capable model for general chat
             model: 'googleai/gemini-1.5-flash'
