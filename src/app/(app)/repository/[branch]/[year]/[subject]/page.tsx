@@ -1,3 +1,6 @@
+'use client';
+
+import { useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { FileCard } from "@/components/file-card";
 import { Upload } from "lucide-react";
@@ -11,6 +14,16 @@ const files = [
 
 export default function SubjectPage({ params }: { params: { subject: string } }) {
   const subjectName = params.subject.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      console.log("File selected:", file.name);
+      // Here you would typically handle the file upload process,
+      // e.g., by sending it to a server.
+    }
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -19,9 +32,17 @@ export default function SubjectPage({ params }: { params: { subject: string } })
           <h1 className="text-3xl font-bold tracking-tight">{subjectName}</h1>
           <p className="text-muted-foreground">Browse and upload resources for this subject.</p>
         </div>
-        <Button>
-          <Upload className="mr-2 h-4 w-4" /> Upload File
-        </Button>
+        <>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <Button onClick={() => fileInputRef.current?.click()}>
+            <Upload className="mr-2 h-4 w-4" /> Upload File
+          </Button>
+        </>
       </div>
       <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
         {files.map((file, index) => (

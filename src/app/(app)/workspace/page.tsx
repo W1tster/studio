@@ -1,3 +1,6 @@
+'use client';
+
+import { useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { FileCard } from "@/components/file-card";
 import { Upload } from "lucide-react";
@@ -10,6 +13,16 @@ const myFiles = [
 
 
 export default function WorkspacePage() {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+          console.log("File selected:", file.name);
+          // Here you would typically handle the file upload process
+        }
+    };
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex justify-between items-start">
@@ -17,9 +30,17 @@ export default function WorkspacePage() {
           <h1 className="text-3xl font-bold tracking-tight">Personal Workspace</h1>
           <p className="text-muted-foreground">Your private space to store and manage study materials.</p>
         </div>
-        <Button>
-          <Upload className="mr-2 h-4 w-4" /> Upload File
-        </Button>
+        <>
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                className="hidden"
+            />
+            <Button onClick={() => fileInputRef.current?.click()}>
+                <Upload className="mr-2 h-4 w-4" /> Upload File
+            </Button>
+        </>
       </div>
       <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
         {myFiles.map((file, index) => (
@@ -29,9 +50,17 @@ export default function WorkspacePage() {
             <div className="lg:col-span-3 flex flex-col items-center justify-center text-center p-12 border-2 border-dashed rounded-lg">
                 <h3 className="text-xl font-semibold">Your workspace is empty</h3>
                 <p className="text-muted-foreground mt-2 mb-4">Upload your first file to get started!</p>
-                <Button>
-                    <Upload className="mr-2 h-4 w-4" /> Upload File
-                </Button>
+                 <>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        className="hidden"
+                    />
+                    <Button onClick={() => fileInputRef.current?.click()}>
+                        <Upload className="mr-2 h-4 w-4" /> Upload File
+                    </Button>
+                </>
             </div>
         )}
       </div>
