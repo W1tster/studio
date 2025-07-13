@@ -1,17 +1,18 @@
 
+export type Message = {
+    role: 'user' | 'model';
+    content: {
+        text: string;
+        file?: {
+            name: string;
+            type: string;
+            dataUri: string;
+        }
+    }
+};
+
 export type ChatInput = {
-    history: {
-        role: 'user' | 'model';
-        content: ({
-            text?: string;
-            media?: {
-                url: string;
-                contentType?: string;
-            };
-        })[];
-    }[];
-    message: string;
-    fileDataUri?: string;
+    messages: Message[];
 };
 
 export type ChatOutput = {

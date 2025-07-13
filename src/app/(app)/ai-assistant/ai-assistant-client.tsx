@@ -7,23 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader, Send, Paperclip, X, User, Sparkles, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { chat } from '@/ai/flows/chat';
-import type { ChatInput } from '@/ai/flows/chat.d';
+import type { Message } from '@/ai/flows/chat.d';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-type Message = {
-  role: 'user' | 'model';
-  content: {
-    text: string;
-    file?: {
-      name: string;
-      type: string;
-      dataUri: string;
-    }
-  }
-};
-
-type HistoryMessage = ChatInput['history'][number];
 
 export function AiAssistantClient() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -94,46 +80,31 @@ export function AiAssistantClient() {
       },
     };
 
-    const currentMessages = [...messages, newUserMessage];
-    setMessages(currentMessages);
+    const updatedMessages = [...messages, newUserMessage];
+    setMessages(updatedMessages);
     setInput('');
     setFile(null);
 
-    const historyForApi: HistoryMessage[] = messages.map(msg => {
-        const content: HistoryMessage['content'] = [];
-        if (msg.content.text) {
-          content.push({ text: msg.content.text });
-        }
-        if (msg.role === 'user' && msg.content.file?.dataUri) {
-             content.push({ media: { url: msg.content.file.dataUri, contentType: msg.content.file.type } });
-        }
-        return { role: msg.role, content };
-    });
-
     try {
-      const result = await chat({
-        history: historyForApi,
-        message: input,
-        fileDataUri: fileDataUri,
-      });
+      const result = await chat({ messages: updatedMessages });
 
-      const assistantMessage: Message = {
-        role: 'model',
-        content: { text: result.response },
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      if (result.response) {
+        const assistantMessage: Message = {
+            role: 'model',
+            content: { text: result.response },
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      } else {
+        throw new Error("Received an empty response from the AI.");
+      }
+
     } catch (e) {
       console.error(e);
       const errorMsg = e instanceof Error ? e.message : 'An unknown error occurred.';
       setError(errorMsg);
       toast({ variant: 'destructive', title: 'Error', description: errorMsg });
       // Roll back the optimistic UI update
-      setMessages(prev => prev.slice(0, -1));
-      setInput(newUserMessage.content.text);
-       if (newUserMessage.content.file) {
-        // This is a simplification. Restoring the file object is more complex.
-        toast({ title: "Message not sent", description: "Your message with attachment was not sent. Please try again."})
-      }
+      setMessages(messages);
     } finally {
       setIsLoading(false);
     }
@@ -144,7 +115,7 @@ export function AiAssistantClient() {
       <CardContent className="flex-grow p-0 overflow-hidden">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           <div className="p-6 space-y-6">
-            {messages.length === 0 && (
+            {messages.length === 0 && !isLoading && (
               <div className="text-center text-muted-foreground">
                 <Sparkles className="mx-auto h-12 w-12" />
                 <h2 className="mt-2 text-xl font-semibold">Start the Conversation</h2>

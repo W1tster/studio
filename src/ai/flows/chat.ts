@@ -8,25 +8,25 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type { ChatInput, ChatOutput } from './chat.d';
+import type { ChatInput, ChatOutput, Message } from './chat.d';
+
+const MessageContentSchema = z.object({
+    text: z.string(),
+    file: z.object({
+        name: z.string(),
+        type: z.string(),
+        dataUri: z.string().describe("A data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+    }).optional(),
+});
 
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
-  content: z.array(z.object({
-    text: z.string().optional(),
-    media: z.object({
-      url: z.string().describe("A data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
-      contentType: z.string().optional(),
-    }).optional(),
-  })),
+  content: MessageContentSchema
 });
 
 const ChatInputSchema = z.object({
-  history: z.array(MessageSchema),
-  message: z.string().describe('The user\'s message.'),
-  fileDataUri: z.string().optional().describe("An optional file, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+  messages: z.array(MessageSchema),
 });
-
 
 const ChatOutputSchema = z.object({
   response: z.string().describe('The AI\'s response.'),
@@ -44,19 +44,30 @@ const chatFlow = ai.defineFlow(
   },
   async (input) => {
     
-    // The history contains all previous messages.
-    const history = input.history.map(h => ({
-      role: h.role,
-      content: h.content,
+    if (input.messages.length === 0) {
+        return { response: "Hello! How can I help you today?" };
+    }
+
+    const allMessages = input.messages;
+    const lastUserMessage = allMessages[allMessages.length - 1];
+
+    // The history contains all messages EXCEPT the last one.
+    const history = allMessages.slice(0, -1).map(msg => ({
+        role: msg.role,
+        content: [
+            { text: msg.content.text }
+            // Note: Genkit history does not currently support media parts in the same way as the prompt.
+            // This implementation focuses on the last message's media.
+        ]
     }));
 
     // The prompt contains only the new parts of the user's message.
     const promptParts = [];
-    if (input.message) {
-      promptParts.push({ text: input.message });
+    if (lastUserMessage.content.text) {
+      promptParts.push({ text: lastUserMessage.content.text });
     }
-    if (input.fileDataUri) {
-      promptParts.push({ media: { url: input.fileDataUri } });
+    if (lastUserMessage.content.file?.dataUri) {
+      promptParts.push({ media: { url: lastUserMessage.content.file.dataUri } });
     }
 
     const { output } = await ai.generate({
