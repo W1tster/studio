@@ -6,7 +6,8 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea';
 import { Loader, Send, Paperclip, X, User, Sparkles, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { chat, ChatInput } from '@/ai/flows/chat';
+import { chat } from '@/ai/flows/chat';
+import { type ChatInput } from '@/ai/flows/chat.d';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -89,7 +90,7 @@ export function AiAssistantClient() {
     setInput('');
     setFile(null);
 
-    const historyForApi = messages.map((msg) => {
+    const historyForApi: ChatInput['history'] = messages.map((msg) => {
         const content: ContentPart[] = [{ text: msg.content }];
         if (msg.file?.dataUri) {
             content.push({ media: { url: msg.file.dataUri, contentType: msg.file.type } });
