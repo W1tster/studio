@@ -1,10 +1,24 @@
+'use client';
+
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, MessageSquare, ArrowUp, ArrowDown } from "lucide-react";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
-const posts = [
+const initialPosts = [
     { id: '1', title: "Doubts about Asymptotic Notation in Algorithms", author: "Priya S.", authorInitials: "PS", replies: 12, votes: 45, branch: "CS", year: "SE" },
     { id: '2', title: "Best resources for learning Thermodynamics?", author: "Rohan M.", authorInitials: "RM", replies: 8, votes: 32, branch: "Mechanical", year: "TE" },
     { id: '3', title: "Internship opportunities for AI/DS students", author: "Aisha K.", authorInitials: "AK", replies: 23, votes: 89, branch: "AI&DS", year: "TE" },
@@ -12,6 +26,32 @@ const posts = [
 ];
 
 export default function ForumPage() {
+  const [posts, setPosts] = useState(initialPosts);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newPostTitle, setNewPostTitle] = useState("");
+  const [newPostContent, setNewPostContent] = useState("");
+
+  const handleCreatePost = () => {
+    if (newPostTitle.trim() === "" || newPostContent.trim() === "") return;
+
+    const newPost = {
+      id: (posts.length + 1).toString(),
+      title: newPostTitle,
+      author: "Student",
+      authorInitials: "S",
+      replies: 0,
+      votes: 0,
+      branch: "General",
+      year: "FE",
+      content: newPostContent,
+    };
+
+    setPosts([newPost, ...posts]);
+    setNewPostTitle("");
+    setNewPostContent("");
+    setIsDialogOpen(false);
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex justify-between items-start">
@@ -19,7 +59,7 @@ export default function ForumPage() {
           <h1 className="text-3xl font-bold tracking-tight">Student Forums</h1>
           <p className="text-muted-foreground">Ask questions, share knowledge, and connect with peers.</p>
         </div>
-        <Button>
+        <Button onClick={() => setIsDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> New Post
         </Button>
       </div>
@@ -59,6 +99,47 @@ export default function ForumPage() {
             </Link>
         ))}
       </div>
+
+       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[525px]">
+          <DialogHeader>
+            <DialogTitle>Create a New Post</DialogTitle>
+            <DialogDescription>
+              Share your question or knowledge with the community.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">
+                Title
+              </Label>
+              <Input
+                id="title"
+                value={newPostTitle}
+                onChange={(e) => setNewPostTitle(e.target.value)}
+                className="col-span-3"
+                placeholder="e.g., How does photosynthesis work?"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="content" className="text-right pt-2">
+                Content
+              </Label>
+              <Textarea
+                id="content"
+                value={newPostContent}
+                onChange={(e) => setNewPostContent(e.target.value)}
+                className="col-span-3 min-h-[120px]"
+                placeholder="Elaborate on your question or topic here."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button type="submit" onClick={handleCreatePost}>Create Post</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
