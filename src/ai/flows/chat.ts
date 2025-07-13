@@ -44,17 +44,19 @@ const chatFlow = ai.defineFlow(
   },
   async (input) => {
     
+    // The history contains all previous messages.
     const history = input.history.map(h => ({
       role: h.role,
       content: h.content,
     }));
 
+    // The prompt contains only the new parts of the user's message.
     const promptParts = [];
     if (input.message) {
       promptParts.push({ text: input.message });
     }
     if (input.fileDataUri) {
-        promptParts.push({ media: { url: input.fileDataUri } });
+      promptParts.push({ media: { url: input.fileDataUri } });
     }
 
     const { output } = await ai.generate({

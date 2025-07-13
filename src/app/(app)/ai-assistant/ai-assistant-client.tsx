@@ -94,13 +94,16 @@ export function AiAssistantClient() {
       },
     };
 
-    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
+    const currentMessages = [...messages, newUserMessage];
+    setMessages(currentMessages);
     setInput('');
     setFile(null);
 
     const historyForApi: HistoryMessage[] = messages.map(msg => {
         const content: HistoryMessage['content'] = [{ text: msg.content.text }];
-        if (msg.content.file?.dataUri) {
+        // Note: The API currently only supports one media part per message.
+        // For simplicity, we assume files are only in user messages.
+        if (msg.role === 'user' && msg.content.file?.dataUri) {
              content.push({ media: { url: msg.content.file.dataUri, contentType: msg.content.file.type } });
         }
         return { role: msg.role, content };
@@ -110,7 +113,7 @@ export function AiAssistantClient() {
       const result = await chat({
         history: historyForApi,
         message: input,
-        fileDataUri: fileMetadata?.dataUri,
+        fileDataUri: fileDataUri,
       });
 
       const assistantMessage: Message = {
@@ -123,11 +126,11 @@ export function AiAssistantClient() {
       const errorMsg = e instanceof Error ? e.message : 'An unknown error occurred.';
       setError(errorMsg);
       toast({ variant: 'destructive', title: 'Error', description: errorMsg });
+      // Roll back the optimistic UI update
       setMessages(prev => prev.slice(0, -1));
       setInput(newUserMessage.content.text);
-      if (newUserMessage.content.file) {
+       if (newUserMessage.content.file) {
         // This is a simplification. Restoring the file object is more complex.
-        // For now, we just indicate that a file was attached.
         toast({ title: "Message not sent", description: "Your message with attachment was not sent. Please try again."})
       }
     } finally {
