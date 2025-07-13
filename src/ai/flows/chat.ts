@@ -46,11 +46,7 @@ const chatFlow = ai.defineFlow(
     
     const history = input.history.map(h => ({
       role: h.role,
-      content: h.content.map(c => {
-        if (c.text) return { text: c.text };
-        if (c.media) return { media: { url: c.media.url, contentType: c.media.contentType } };
-        return {};
-      })
+      content: h.content,
     }));
 
     const promptParts: any[] = [{ text: input.message }];
