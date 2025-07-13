@@ -43,7 +43,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarMenu className="flex-grow">
         <SidebarMenuItem>
-          <Link href="/dashboard" legacyBehavior passHref>
+          <Link href="/dashboard">
             <SidebarMenuButton isActive={isActive('/dashboard')} tooltip="Dashboard">
               <LayoutDashboard />
               Dashboard
@@ -51,7 +51,7 @@ export function AppSidebar() {
           </Link>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <Link href="/repository" legacyBehavior passHref>
+          <Link href="/repository">
             <SidebarMenuButton isActive={isActive('/repository')} tooltip="Repository">
               <Library />
               Repository
@@ -59,7 +59,7 @@ export function AppSidebar() {
           </Link>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <Link href="/forum" legacyBehavior passHref>
+          <Link href="/forum">
             <SidebarMenuButton isActive={isActive('/forum')} tooltip="Forums">
               <MessagesSquare />
               Forums
@@ -67,7 +67,7 @@ export function AppSidebar() {
           </Link>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <Link href="/ai-assistant" legacyBehavior passHref>
+          <Link href="/ai-assistant">
             <SidebarMenuButton isActive={isActive('/ai-assistant')} tooltip="AI Assistant">
               <BrainCircuit />
               AI Assistant
@@ -75,7 +75,7 @@ export function AppSidebar() {
           </Link>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <Link href="/workspace" legacyBehavior passHref>
+          <Link href="/workspace">
             <SidebarMenuButton isActive={isActive('/workspace')} tooltip="Workspace">
               <User />
               Workspace
@@ -85,7 +85,7 @@ export function AppSidebar() {
       </SidebarMenu>
       <SidebarFooter>
          <SidebarMenuItem>
-          <Link href="#" legacyBehavior passHref>
+          <Link href="#">
             <SidebarMenuButton tooltip="Settings">
               <Settings />
               Settings
@@ -93,7 +93,7 @@ export function AppSidebar() {
           </Link>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <Link href="/login" legacyBehavior passHref>
+          <Link href="/login">
             <SidebarMenuButton tooltip="Logout">
               <LogOut />
               Logout
