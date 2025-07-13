@@ -49,7 +49,10 @@ const chatFlow = ai.defineFlow(
       content: h.content,
     }));
 
-    const promptParts = [{ text: input.message }];
+    const promptParts = [];
+    if (input.message) {
+      promptParts.push({ text: input.message });
+    }
     if (input.fileDataUri) {
         promptParts.push({ media: { url: input.fileDataUri } });
     }
