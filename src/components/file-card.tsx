@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { cn } from '@/lib/utils';
 
 interface FileCardProps {
   name: string;
@@ -41,9 +42,27 @@ export function FileCard({
   votes: initialVotes,
 }: FileCardProps) {
   const [votes, setVotes] = useState(initialVotes);
+  const [userVote, setUserVote] = useState<number>(0); // 0 = none, 1 = up, -1 = down
 
-  const handleVote = (amount: number) => {
-    setVotes(currentVotes => currentVotes + amount);
+  const handleVote = (voteType: 'up' | 'down') => {
+    const voteValue = voteType === 'up' ? 1 : -1;
+
+    if (userVote === voteValue) {
+      // User is undoing their vote
+      setVotes(votes - voteValue);
+      setUserVote(0);
+    } else {
+      // New vote or changing vote
+      let newVoteCount = votes;
+      if (userVote !== 0) {
+        // First, undo the previous vote
+        newVoteCount -= userVote;
+      }
+      // Then, apply the new vote
+      newVoteCount += voteValue;
+      setVotes(newVoteCount);
+      setUserVote(voteValue);
+    }
   };
 
   return (
@@ -79,11 +98,21 @@ export function FileCard({
       </CardContent>
       <CardFooter className="flex justify-between items-center bg-muted/50 p-3">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleVote(1)}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={cn("h-8 w-8", userVote === 1 && "bg-primary/20 text-primary")}
+            onClick={() => handleVote('up')}
+          >
             <ArrowUp className="h-5 w-5" />
           </Button>
           <span className="font-bold text-lg">{votes}</span>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleVote(-1)}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={cn("h-8 w-8", userVote === -1 && "bg-destructive/20 text-destructive")}
+            onClick={() => handleVote('down')}
+          >
             <ArrowDown className="h-5 w-5" />
           </Button>
         </div>

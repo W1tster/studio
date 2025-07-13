@@ -17,12 +17,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { cn } from '@/lib/utils';
 
 const initialPosts = [
-    { id: '1', title: "Doubts about Asymptotic Notation in Algorithms", author: "Priya S.", authorInitials: "PS", replies: 12, votes: 45, branch: "CS", year: "SE", attachment: "notes.pdf" },
-    { id: '2', title: "Best resources for learning Thermodynamics?", author: "Rohan M.", authorInitials: "RM", replies: 8, votes: 32, branch: "Mechanical", year: "TE" },
-    { id: '3', title: "Internship opportunities for AI/DS students", author: "Aisha K.", authorInitials: "AK", replies: 23, votes: 89, branch: "AI&DS", year: "TE", attachment: "internship_list.docx" },
-    { id: '4', title: "How to prepare for the final year project?", author: "Vikram R.", authorInitials: "VR", replies: 5, votes: 18, branch: "IT", year: "BE" },
+    { id: '1', title: "Doubts about Asymptotic Notation in Algorithms", author: "Priya S.", authorInitials: "PS", replies: 12, votes: 45, branch: "CS", year: "SE", attachment: "notes.pdf", userVote: 0 },
+    { id: '2', title: "Best resources for learning Thermodynamics?", author: "Rohan M.", authorInitials: "RM", replies: 8, votes: 32, branch: "Mechanical", year: "TE", userVote: 0 },
+    { id: '3', title: "Internship opportunities for AI/DS students", author: "Aisha K.", authorInitials: "AK", replies: 23, votes: 89, branch: "AI&DS", year: "TE", attachment: "internship_list.docx", userVote: 0 },
+    { id: '4', title: "How to prepare for the final year project?", author: "Vikram R.", authorInitials: "VR", replies: 5, votes: 18, branch: "IT", year: "BE", userVote: 0 },
 ];
 
 type Post = typeof initialPosts[0];
@@ -57,13 +58,33 @@ export default function ForumPage() {
     }
   }, [posts, hasMounted]);
 
-  const handleVote = (e: React.MouseEvent, postId: string, amount: number) => {
+  const handleVote = (e: React.MouseEvent, postId: string, voteType: 'up' | 'down') => {
     e.preventDefault();
     e.stopPropagation();
+    
     setPosts(currentPosts => 
-      currentPosts.map(p => 
-        p.id === postId ? { ...p, votes: p.votes + amount } : p
-      )
+      currentPosts.map(p => {
+        if (p.id === postId) {
+          const voteValue = voteType === 'up' ? 1 : -1;
+          let newVoteCount = p.votes;
+          let newUserVote = p.userVote;
+
+          if (newUserVote === voteValue) {
+            // Undoing the vote
+            newVoteCount -= voteValue;
+            newUserVote = 0;
+          } else {
+            // Changing vote or new vote
+            if (newUserVote !== 0) {
+              newVoteCount -= newUserVote; // Remove old vote
+            }
+            newVoteCount += voteValue; // Add new vote
+            newUserVote = voteValue;
+          }
+          return { ...p, votes: newVoteCount, userVote: newUserVote };
+        }
+        return p;
+      })
     );
   };
 
@@ -80,6 +101,7 @@ export default function ForumPage() {
       branch: "General",
       year: "FE",
       attachment: newPostFile?.name,
+      userVote: 0,
     };
 
     setPosts(prevPosts => [newPost, ...prevPosts]);
@@ -117,9 +139,15 @@ export default function ForumPage() {
                 <Card className="hover:border-primary/80 transition-colors">
                     <CardContent className="p-4 flex items-center gap-4">
                         <div className="flex flex-col items-center gap-1 p-2 rounded-md bg-muted/50">
-                            <ArrowUp className="h-5 w-5 hover:text-primary cursor-pointer" onClick={(e) => handleVote(e, post.id, 1)} />
+                            <ArrowUp 
+                              className={cn("h-5 w-5 hover:text-primary cursor-pointer", post.userVote === 1 && "text-primary")}
+                              onClick={(e) => handleVote(e, post.id, 'up')} 
+                            />
                             <span className="font-bold text-lg">{post.votes}</span>
-                            <ArrowDown className="h-5 w-5 hover:text-destructive cursor-pointer" onClick={(e) => handleVote(e, post.id, -1)} />
+                            <ArrowDown 
+                              className={cn("h-5 w-5 hover:text-destructive cursor-pointer", post.userVote === -1 && "text-destructive")}
+                              onClick={(e) => handleVote(e, post.id, 'down')} 
+                            />
                         </div>
                         <div className="flex-grow">
                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
