@@ -12,7 +12,13 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SummarizeNotesInputSchema = z.object({
-  notes: z.string().describe('The notes to be summarized.'),
+  notes: z.string().optional().describe('The notes to be summarized.'),
+  fileDataUri: z
+    .string()
+    .optional()
+    .describe(
+      "A file containing notes (e.g., an image or text document), as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
 });
 export type SummarizeNotesInput = z.infer<typeof SummarizeNotesInputSchema>;
 
@@ -21,7 +27,9 @@ const SummarizeNotesOutputSchema = z.object({
 });
 export type SummarizeNotesOutput = z.infer<typeof SummarizeNotesOutputSchema>;
 
-export async function summarizeNotes(input: SummarizeNotesInput): Promise<SummarizeNotesOutput> {
+export async function summarizeNotes(
+  input: SummarizeNotesInput
+): Promise<SummarizeNotesOutput> {
   return summarizeNotesFlow(input);
 }
 
@@ -29,7 +37,18 @@ const summarizeNotesPrompt = ai.definePrompt({
   name: 'summarizeNotesPrompt',
   input: {schema: SummarizeNotesInputSchema},
   output: {schema: SummarizeNotesOutputSchema},
-  prompt: `Summarize the following notes:\n\n{{{notes}}}`,
+  prompt: `You are an expert at summarizing notes. Summarize the following content. If there is both text and a file, consider them together.
+
+  {{#if notes}}
+  Text Content:
+  {{{notes}}}
+  {{/if}}
+
+  {{#if fileDataUri}}
+  File Content:
+  {{media url=fileDataUri}}
+  {{/if}}
+  `,
 });
 
 const summarizeNotesFlow = ai.defineFlow(
@@ -39,6 +58,9 @@ const summarizeNotesFlow = ai.defineFlow(
     outputSchema: SummarizeNotesOutputSchema,
   },
   async input => {
+    if (!input.notes && !input.fileDataUri) {
+      throw new Error('Please provide notes or a file to summarize.');
+    }
     const {output} = await summarizeNotesPrompt(input);
     return output!;
   }
