@@ -79,6 +79,12 @@ export function AiAssistantClient() {
         ...(fileMetadata && { file: fileMetadata }),
       },
     };
+    
+    // Prevent sending empty messages
+    if (!newUserMessage.content.text && !newUserMessage.content.file) {
+      setIsLoading(false);
+      return;
+    }
 
     const updatedMessages = [...messages, newUserMessage];
     setMessages(updatedMessages);
