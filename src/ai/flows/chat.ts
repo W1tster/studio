@@ -49,14 +49,14 @@ const chatFlow = ai.defineFlow(
       content: h.content,
     }));
 
-    let prompt: any = input.message;
+    const promptParts = [{ text: input.message }];
     if (input.fileDataUri) {
-        prompt = [{ text: input.message }, { media: { url: input.fileDataUri } }];
+        promptParts.push({ media: { url: input.fileDataUri } });
     }
 
     const { output } = await ai.generate({
         history,
-        prompt,
+        prompt: promptParts,
         model: 'googleai/gemini-1.5-flash'
     });
 
