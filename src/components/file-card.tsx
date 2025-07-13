@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -35,8 +38,14 @@ export function FileCard({
   type,
   uploader,
   uploadDate,
-  votes,
+  votes: initialVotes,
 }: FileCardProps) {
+  const [votes, setVotes] = useState(initialVotes);
+
+  const handleVote = (amount: number) => {
+    setVotes(currentVotes => currentVotes + amount);
+  };
+
   return (
     <Card className="flex flex-col">
       <CardHeader>
@@ -70,11 +79,11 @@ export function FileCard({
       </CardContent>
       <CardFooter className="flex justify-between items-center bg-muted/50 p-3">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleVote(1)}>
             <ArrowUp className="h-5 w-5" />
           </Button>
           <span className="font-bold text-lg">{votes}</span>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleVote(-1)}>
             <ArrowDown className="h-5 w-5" />
           </Button>
         </div>

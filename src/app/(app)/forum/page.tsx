@@ -25,8 +25,10 @@ const initialPosts = [
     { id: '4', title: "How to prepare for the final year project?", author: "Vikram R.", authorInitials: "VR", replies: 5, votes: 18, branch: "IT", year: "BE" },
 ];
 
+type Post = typeof initialPosts[0];
+
 export default function ForumPage() {
-  const [posts, setPosts] = useState<typeof initialPosts>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
@@ -55,10 +57,20 @@ export default function ForumPage() {
     }
   }, [posts, hasMounted]);
 
+  const handleVote = (e: React.MouseEvent, postId: string, amount: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setPosts(currentPosts => 
+      currentPosts.map(p => 
+        p.id === postId ? { ...p, votes: p.votes + amount } : p
+      )
+    );
+  };
+
   const handleCreatePost = () => {
     if (newPostTitle.trim() === "" || newPostContent.trim() === "") return;
 
-    const newPost = {
+    const newPost: Post = {
       id: (posts.length + 1).toString(),
       title: newPostTitle,
       author: "Student",
@@ -105,9 +117,9 @@ export default function ForumPage() {
                 <Card className="hover:border-primary/80 transition-colors">
                     <CardContent className="p-4 flex items-center gap-4">
                         <div className="flex flex-col items-center gap-1 p-2 rounded-md bg-muted/50">
-                            <ArrowUp className="h-5 w-5 hover:text-primary cursor-pointer"/>
+                            <ArrowUp className="h-5 w-5 hover:text-primary cursor-pointer" onClick={(e) => handleVote(e, post.id, 1)} />
                             <span className="font-bold text-lg">{post.votes}</span>
-                            <ArrowDown className="h-5 w-5 hover:text-destructive cursor-pointer"/>
+                            <ArrowDown className="h-5 w-5 hover:text-destructive cursor-pointer" onClick={(e) => handleVote(e, post.id, -1)} />
                         </div>
                         <div className="flex-grow">
                              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
