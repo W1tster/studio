@@ -54,11 +54,7 @@ const chatFlow = ai.defineFlow(
     // The history contains all messages EXCEPT the last one.
     const history = allMessages.slice(0, -1).map(msg => ({
         role: msg.role,
-        content: [
-            { text: msg.content.text }
-            // Note: Genkit history does not currently support media parts in the same way as the prompt.
-            // This implementation focuses on the last message's media.
-        ]
+        content: [{ text: msg.content.text }] // Note: Genkit history does not currently support media parts in the same way as the prompt.
     }));
 
     // The prompt contains only the new parts of the user's message.
