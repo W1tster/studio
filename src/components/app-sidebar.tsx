@@ -12,11 +12,11 @@ import {
   LayoutDashboard,
   Library,
   MessagesSquare,
-  BrainCircuit,
   User,
   LogOut,
   Settings,
   BookOpen,
+  FileText,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -67,10 +67,10 @@ export function AppSidebar() {
           </Link>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <Link href="/ai-assistant">
-            <SidebarMenuButton isActive={isActive('/ai-assistant')} tooltip="AI Assistant">
-              <BrainCircuit />
-              AI Assistant
+          <Link href="/summarize">
+            <SidebarMenuButton isActive={isActive('/summarize')} tooltip="Summarize">
+              <FileText />
+              Summarize
             </SidebarMenuButton>
           </Link>
         </SidebarMenuItem>

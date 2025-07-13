@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, BrainCircuit, Library, MessagesSquare, Plus } from "lucide-react";
+import { ArrowRight, BrainCircuit, Library, MessagesSquare, Plus, FileText } from "lucide-react";
 import Link from "next/link";
 import Image from 'next/image';
 import Balancer from "react-wrap-balancer";
@@ -53,15 +53,15 @@ export default function DashboardPage() {
         <Card className="hover:border-primary/50 transition-colors">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BrainCircuit className="text-primary" />
-              <span>AI Assistant</span>
+              <FileText className="text-primary" />
+              <span>Summarize Notes</span>
             </CardTitle>
-            <CardDescription>Summarize, explain, and generate questions.</CardDescription>
+            <CardDescription>Use AI to summarize your study notes.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/ai-assistant">
+            <Link href="/summarize">
               <Button variant="outline" className="w-full">
-                Use AI Assistant <ArrowRight className="ml-2 h-4 w-4" />
+                Summarize Notes <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </CardContent>
