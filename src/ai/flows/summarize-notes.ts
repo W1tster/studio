@@ -5,7 +5,7 @@
  *
  * - summarizeNotes - A function that accepts notes and returns a summary.
  * - SummarizeNotesInput - The input type for the summarizeNotes function.
- * - SummarizeNotesOutput - The return type for the summarizeNotes function.
+ * - SummarizeNotesOutput - The return type for the summarizeNotes function
  */
 
 import {ai} from '@/ai/genkit';
